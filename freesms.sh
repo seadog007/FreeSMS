@@ -3,6 +3,9 @@
 Phone=$1
 Msg=$2
 
+Fail=0
+FailTime=0
+
 if [ -z "$Phone" ]
 then
 	echo "Enter the Phone number (without first 0):"
@@ -29,20 +32,23 @@ Time=`date +%s%3N`
 #img2txt -H 20 out.png
 #echo $VerCode
 #read VerCode
-until [ -n "$res" ]
+
+until [ -n "$res" ] || [ $FailTime -ge 5 ]
 do
-res=$(curl -s 'http://www.afreesms.com/worldwide/taiwan' \
--H 'Pragma: no-cache' \
--H 'Origin: http://www.afreesms.com' \
--H 'Content-Type: application/x-www-form-urlencoded' \
--H 'Accept: */*' \
--H 'Cache-Control: no-cache' \
--H 'Connection: keep-alive' \
--H 'Accept-Language: zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4,zh-CN;q=0.2' \
--H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.76 Safari/537.36' \
--H 'Referer: http://www.afreesms.com/worldwide/taiwan' \
--H "Cookie: rd=www.afreesms.com; session_id=$SID" \
---data "xajax=processMsg&\
+	Fail=1
+
+	res=$(curl -s 'http://www.afreesms.com/worldwide/taiwan' \
+	-H 'Pragma: no-cache' \
+	-H 'Origin: http://www.afreesms.com' \
+	-H 'Content-Type: application/x-www-form-urlencoded' \
+	-H 'Accept: */*' \
+	-H 'Cache-Control: no-cache' \
+	-H 'Connection: keep-alive' \
+	-H 'Accept-Language: zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4,zh-CN;q=0.2' \
+	-H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.76 Safari/537.36' \
+	-H 'Referer: http://www.afreesms.com/worldwide/taiwan' \
+	-H "Cookie: rd=www.afreesms.com; session_id=$SID" \
+	--data "xajax=processMsg&\
 xajaxr=$Time&\
 xajaxargs[]=%3Cxjxquery%3E\
 %3Cq%3E\
@@ -56,4 +62,17 @@ $Hidden%26\
 IL_IN_TAG%3D1\
 %3C%2Fq%3E\
 %3C%2Fxjxquery%3E" | grep report)
+
+	FailTime=$((FailTime + 1))
+	if [ -n "$res" ]
+	then
+		Fail=0
+	fi
 done
+
+if [ $Fail -gt 0 ]
+then
+	echo "Fail"
+else
+	echo "Success"
+fi
