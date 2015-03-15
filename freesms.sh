@@ -1,9 +1,15 @@
 #!/bin/bash
 
+# usage:
+# ./freesms.sh [Phone] [Msg] 0 <- No Proxy setting
+# ./freesms.sh [Phone] [Msg] 1 [Proxy Address] [Proxy Port] <- Use Proxy
+
+
 Phone=$1
 Msg=$2
-ProxyAddr=$3
-ProxyPort=$4
+UseProxy=$3
+ProxyAddr=$4
+ProxyPort=$5
 
 Fail=0
 FailTime=0
@@ -22,20 +28,28 @@ do
 	read Msg
 done
 
-
-until [ -n "$ProxyAddr" ]
+until [ -n "$UseProxy" ]
 do
-	echo "Enter the Proxy Address (only HTTP proxy):"
-	read ProxyAddr
+	echo "Use Proxy? (0/1):"
+	read UseProxy
 done
 
-until [ -n "$ProxyPort" ]
-do
-	echo "Enter the Proxy Port (only HTTP proxy):"
-	read ProxyPort
-done
+if [ $UseProxy -ge 1 ]
+then
+	until [ -n "$ProxyAddr" ]
+	do
+		echo "Enter the Proxy Address (only HTTP proxy):"
+		read ProxyAddr
+	done
 
+	until [ -n "$ProxyPort" ]
+	do
+		echo "Enter the Proxy Port (only HTTP proxy):"
+		read ProxyPort
+	done
 ./setproxy.sh 1 $ProxyAddr $ProxyPort
+fi
+
 
 SID=`curl -s -D- -o /dev/null http://www.afreesms.com/worldwide/taiwan | grep session_id | awk -F=\|\; '{print $2}'`
 Hidden=`curl -s http://www.afreesms.com/worldwide/taiwan -H "Cookie: session_id=$SID" -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.76 Safari/537.36' | grep -o '".\{38\}" value=".\{36\}"' | sed 's/"//g' | sed 's/ value//g'`
@@ -92,4 +106,8 @@ then
 else
 	echo "Success"
 fi
+
+if [ $UseProxy -ge 1 ]
+then
 ./setproxy.sh 0
+fi
