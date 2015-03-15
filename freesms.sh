@@ -2,24 +2,40 @@
 
 Phone=$1
 Msg=$2
+ProxyAddr=$3
+ProxyPort=$4
 
 Fail=0
 FailTime=0
+MaxFailTime=10
 
-if [ -z "$Phone" ]
-then
+until [ -n "$Phone" ]
+do
 	echo "Enter the Phone number (without first 0):"
 	read Phone
-fi
+done
 
-if [ -z "$Msg" ]
-then
-	until [ -n "`./messagecount.sh $Msg`" ]
-	do
-		echo "Enter your message (160 chars):"
-		read Msg
-	done
-fi
+
+until [ -n "`./messagecount.sh $Msg`" ]
+do
+	echo "Enter your message (160 chars):"
+	read Msg
+done
+
+
+until [ -n "$ProxyAddr" ]
+do
+	echo "Enter the Proxy Address (only HTTP proxy):"
+	read ProxyAddr
+done
+
+until [ -n "$ProxyPort" ]
+do
+	echo "Enter the Proxy Port (only HTTP proxy):"
+	read ProxyPort
+done
+
+./setproxy.sh 1 $ProxyAddr $ProxyPort
 
 SID=`curl -s -D- -o /dev/null http://www.afreesms.com/worldwide/taiwan | grep session_id | awk -F=\|\; '{print $2}'`
 Hidden=`curl -s http://www.afreesms.com/worldwide/taiwan -H "Cookie: session_id=$SID" -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.76 Safari/537.36' | grep -o '".\{38\}" value=".\{36\}"' | sed 's/"//g' | sed 's/ value//g'`
@@ -33,7 +49,7 @@ Time=`date +%s%3N`
 #echo $VerCode
 #read VerCode
 
-until [ -n "$res" ] || [ $FailTime -ge 5 ]
+until [ -n "$res" ] || [ $FailTime -ge $MaxFailTime ]
 do
 	Fail=1
 
@@ -76,3 +92,4 @@ then
 else
 	echo "Success"
 fi
+./setproxy.sh 0
