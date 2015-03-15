@@ -13,7 +13,7 @@ ProxyPort=$5
 
 Fail=0
 FailTime=0
-MaxFailTime=10
+MaxFailTime=30
 
 until [ -n "$Phone" ]
 do
