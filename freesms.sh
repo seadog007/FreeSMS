@@ -85,7 +85,7 @@ xajaxargs[]=%3Cxjxquery%3E\
 IL_IN_TAG%3D1%26\
 countrycode%3D886%26\
 smsto%3D$Phone%26\
-message%3D$(perl -MURI::Escape -e 'print uri_escape($ARGV[0]);' "$Msg")%26\
+message%3D$(perl -MURI::Escape -e 'print uri_escape($ARGV[0]);' "$(perl -MURI::Escape -e 'print uri_escape($ARGV[0]);' "$Msg")")%26\
 msgLen%3D141%26\
 imgcode%3D$VerCode%26\
 $Hidden%26\
