@@ -29,15 +29,15 @@ if ($password == '~~~'){
     }else{
       if (mb_strlen($msg) <= 160 && mb_strlen($msg) >= 10){
         if ($proxyaddr=='' || $proxyport=''){
-          $command = './freesms.sh ' . $phone . ' ' . $msg . ' 0';
+          $command = './freesms.sh ' . $phone . ' \'' . $msg . '\' 0';
         }else{
-          $command = './freesms.sh ' . $phone . ' ' . $msg . ' 1' . $proxyaddr . ' ' . $proxyport;
+          $command = './freesms.sh ' . $phone . ' \'' . $msg . '\' 1' . $proxyaddr . ' ' . $proxyport;
         }
       }else{
         die('Please Enter Correct Message<br>char >= 10<br>and<br>char <=160');
       }
     }
-    var_dump(exec(escapeshellcmd($command)));
+    echo exec(escapeshellcmd($command));
   }else{
     r403();
   }
